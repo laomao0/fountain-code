@@ -33,29 +33,36 @@ decoded_bp_index = [];
 global Decoded_data
 Decoded_data = [];
 
+
+% channel loss rate
+channel = randsrc(1,size(send_index,2),[0:1; [0.1 0.9]]);
+
+
+
 for i = send_index
     
     %sending data
     code_send{1,1} = code_encode(i,:); 
     code_send{1,2} = H(i,:);    
     
-    %receving data
-    receive_packet = receive_packet + 1;
-    if receive_packet == 500
-        a = 1;
-    end
+    %receving data 
     
+    receive_packet = receive_packet + 1;
+    
+if channel(i) == 1    
     % uncomment the below to enable Gaussian or BP decode algorithm
-    %[H_decode,code_decode,tag_decode] = LT_decode_Guassian(code_send{1,2},code_send{1,1},H_decode,code_decode);
-    [H_decode,code_decode,tag_decode,decoded_bp_index] = LT_decode_BP(code_send{1,2},code_send{1,1},H_decode,code_decode,decoded_bp_index); 
+    [H_decode,code_decode,tag_decode] = LT_decode_Guassian(code_send{1,2},code_send{1,1},H_decode,code_decode);
+    %[H_decode,code_decode,tag_decode,decoded_bp_index] = LT_decode_BP(code_send{1,2},code_send{1,1},H_decode,code_decode,decoded_bp_index); 
     if tag_decode == 1
-        rate = check_decoded(message_matrix, Decoded_data);
-        receive_pkt = size(code_decode,1);        
+        %rate = check_decoded(message_matrix, Decoded_data);
+        rate = check_decoded(message_matrix, code_decode);
+        receive_pkt = receive_packet;        
         disp('decode success');
         disp('receive packet num is');
         disp(receive_pkt);
         disp('errer rate is');
         disp(rate);
         break;
-    end    
+    end  
+end
 end
